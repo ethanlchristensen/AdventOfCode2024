@@ -6,6 +6,7 @@ from datetime import datetime
 import requests
 from pathlib import Path
 from dotenv import load_dotenv
+import pytz
 
 # Load environment variables
 load_dotenv(override=True)
@@ -121,23 +122,37 @@ def run_solution(day_to_process, main_path):
     os.chdir(main_path % "")
     print()
 
+def adjusted_aoc_day_now():
+    """Calculate the current AOC day accounting for early release timezone offset."""
+    cst = pytz.timezone('America/Chicago')
+    now = datetime.now(cst)
+    
+    # Advent of Code releases puzzles at 00:00 UTC, which is 6:00 PM CST the previous day
+    # We need to shift by 5 hours more because we're considering 11:00 PM CST
+    if now.hour >= 23:
+        # If the current time is on or after 11 PM CST, consider it the following day
+        return now.day + 1
+    return now.day
+
 def main():
     args = parse_args()
     main_path = os.getcwd() + "\\%s"
-    current_date = datetime.now()
     
+    # Adjust AOC day handling
+    current_day = adjusted_aoc_day_now()
+
     # Determine the day range to process
     if args.day:
         day_to_process = [args.day]
     else:
         if args.from_day:
             start_day = args.from_day
-            end_day = args.to_day if args.to_day else (current_date.day if current_date.month == 12 else None)
+            end_day = args.to_day if args.to_day else (current_day if datetime.now().month == 12 else None)
         elif args.to_day:
-            start_day = current_date.day if current_date.month == 12 else None
+            start_day = current_day if datetime.now().month == 12 else None
             end_day = args.to_day
         else:
-            start_day = current_date.day if current_date.month == 12 else None
+            start_day = current_day if datetime.now().month == 12 else None
             end_day = start_day
 
         if start_day is None or end_day is None:
