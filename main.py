@@ -67,6 +67,18 @@ def parse_args():
         help="Run solution for the specified or current day"
     )
     parser.add_argument(
+        "--from",
+        dest="from_day",
+        type=int,
+        help="Specify starting day to run solutions (inclusive)"
+    )
+    parser.add_argument(
+        "--to",
+        dest="to_day",
+        type=int,
+        help="Specify ending day to run solutions (inclusive)"
+    )
+    parser.add_argument(
         "--token",
         type=str,
         help="Advent of Code session token required for downloading input",
@@ -89,17 +101,50 @@ def get_folders(main_path):
         ).keys()
     )
 
+def run_solution(day_to_process, main_path):
+    """Run the solution for a specific day."""
+    folders = get_folders(main_path)
+    day_folder = next(
+        (f for f in folders if int(f.split("-")[0]) == day_to_process), 
+        None
+    )
+
+    if not day_folder:
+        print(f"No solution folder found for day {day_to_process}")
+        return
+
+    banner = re.sub(r"[^A-Z ]", "", day_folder.replace("-", " ").upper()).strip()
+    print(f"{banner:=^35s}")
+    os.chdir(main_path % day_folder)
+    module = __import__(day_folder, fromlist=[day_folder])
+    getattr(module, day_folder).solve()
+    os.chdir(main_path % "")
+    print()
+
 def main():
     args = parse_args()
     main_path = os.getcwd() + "\\%s"
     current_date = datetime.now()
     
-    # Determine which day to process
-    day_to_process = args.day if args.day else current_date.day if current_date.month == 12 else None
-    
-    if not day_to_process:
-        print("Please specify a day with --day or run during December")
-        return
+    # Determine the day range to process
+    if args.day:
+        day_to_process = [args.day]
+    else:
+        if args.from_day:
+            start_day = args.from_day
+            end_day = args.to_day if args.to_day else (current_date.day if current_date.month == 12 else None)
+        elif args.to_day:
+            start_day = current_date.day if current_date.month == 12 else None
+            end_day = args.to_day
+        else:
+            start_day = current_date.day if current_date.month == 12 else None
+            end_day = start_day
+
+        if start_day is None or end_day is None:
+            print("Please specify a day with --day, --from, or --to, or run during December")
+            return
+
+        day_to_process = range(start_day, end_day + 1)
 
     # Download input if requested
     if args.download:
@@ -108,27 +153,13 @@ def main():
             raise ValueError(
                 f"Session token is required. Use --token option or store it in the .env file under {SESSION_VAR_NAME}."
             )
-        download_input_if_needed(day_to_process, session_token, main_path)
+        for day in day_to_process:
+            download_input_if_needed(day, session_token, main_path)
 
-    # Run solution if requested
+    # Run solutions if requested
     if args.run:
-        folders = get_folders(main_path)
-        day_folder = next(
-            (f for f in folders if int(f.split("-")[0]) == day_to_process), 
-            None
-        )
-        
-        if not day_folder:
-            print(f"No solution folder found for day {day_to_process}")
-            return
-
-        banner = re.sub(r"[^A-Z ]", "", day_folder.replace("-", " ").upper()).strip()
-        print(f"{banner:=^35s}")
-        os.chdir(main_path % day_folder)
-        module = __import__(day_folder, fromlist=[day_folder])
-        getattr(module, day_folder).solve()
-        os.chdir(main_path % "")
-        print()
+        for day in day_to_process:
+            run_solution(day, main_path)
 
 if __name__ == "__main__":
     main()
