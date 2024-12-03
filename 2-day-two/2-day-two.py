@@ -24,27 +24,13 @@ def part_one():
     """
     code to solve part one
     """
-    reports = load_data()
-    safe = 0
-    for report in reports:
-        if is_safe(report): safe += 1
-    return safe
+    return sum([1 if is_safe(report) else 0 for report in load_data()])
 
 def part_two():
     """
     code to solve part two
     """
-    reports = load_data()
-    safe = 0
-    for report in reports:
-        if is_safe(report): safe += 1
-        else:
-            for idx in range(len(report)):
-                new_report = [v for i, v in enumerate(report) if i != idx]
-                if is_safe(new_report):
-                    safe += 1
-                    break
-    return safe
+    return sum([1 if (is_safe(report) or any([is_safe([v for i, v in enumerate(report) if i != idx]) for idx in range(len(report))])) else 0 for report in load_data()])
     
 def solve():
     """

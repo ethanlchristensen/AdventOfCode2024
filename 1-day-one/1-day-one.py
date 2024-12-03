@@ -19,15 +19,13 @@ def part_one():
     """
     code to solve part one
     """
-    l1, l2 = load_data()
-    return sum([abs(a - b) for a, b in zip(sorted(l1), sorted(l2))])
+    return sum([abs(a - b) for a, b in zip(*load_data())])
 
 def part_two():
     """
     code to solve part two
     """
-    l1, l2 = load_data()
-    return sum([num * l2.count(num) for num in l1])
+    return sum([num * load_data()[1].count(num) for num in load_data()[0]])
     
 def solve():
     """
