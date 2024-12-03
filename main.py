@@ -51,25 +51,20 @@ def download_input_if_needed(day, session_token, main_path):
 def parse_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(description="Advent of Code CLI.")
-    subparsers = parser.add_subparsers(dest="command", required=True)
-
-    # Create the parser for the "run" command
-    run_parser = subparsers.add_parser("run", help="Run Advent of Code problems")
-    run_parser.add_argument("--all", action="store_true", help="Run all problems")
-    run_parser.add_argument(
-        "--up-to-today",
-        action="store_true",
-        help="Run all problems up to and including the current day",
-    )
-    run_parser.add_argument(
-        "--day", 
-        type=int, 
-        help="Specify a specific day to run"
-    )
-
-    # Global options
     parser.add_argument(
-        "--download", action="store_true", help="Download today's input"
+        "--download", 
+        action="store_true", 
+        help="Download input data"
+    )
+    parser.add_argument(
+        "--day",
+        type=int,
+        help="Specify a day (defaults to current day in December)"
+    )
+    parser.add_argument(
+        "--run",
+        action="store_true",
+        help="Run solution for the specified or current day"
     )
     parser.add_argument(
         "--token",
@@ -98,39 +93,42 @@ def main():
     args = parse_args()
     main_path = os.getcwd() + "\\%s"
     current_date = datetime.now()
+    
+    # Determine which day to process
+    day_to_process = args.day if args.day else current_date.day if current_date.month == 12 else None
+    
+    if not day_to_process:
+        print("Please specify a day with --day or run during December")
+        return
 
-    # Download input if requested and valid
-    if args.download and current_date.month == 12:
+    # Download input if requested
+    if args.download:
         session_token = os.getenv(SESSION_VAR_NAME) or args.token
         if not session_token:
             raise ValueError(
                 f"Session token is required. Use --token option or store it in the .env file under {SESSION_VAR_NAME}."
             )
-        download_input_if_needed(current_date.day, session_token, main_path)
-    elif args.download:
-        print("It's not December; input download is typically for December only.")
+        download_input_if_needed(day_to_process, session_token, main_path)
 
-    # Run solutions if "run" command is selected
-    if args.command == "run":
+    # Run solution if requested
+    if args.run:
         folders = get_folders(main_path)
-        if args.day:
-            folders = [f for f in folders if int(f.split("-")[0]) == args.day]
-        elif not args.all and current_date.month == 12:
-            max_day = current_date.day if args.up_to_today else current_date.day
-            folders = [f for f in folders if int(f.split("-")[0]) <= max_day]
-
-        if not folders:
-            print(f"No folders found for the specified options.")
+        day_folder = next(
+            (f for f in folders if int(f.split("-")[0]) == day_to_process), 
+            None
+        )
+        
+        if not day_folder:
+            print(f"No solution folder found for day {day_to_process}")
             return
 
-        for folder in folders:
-            banner = re.sub(r"[^A-Z ]", "", folder.replace("-", " ").upper()).strip()
-            print(f"{banner:=^35s}")
-            os.chdir(main_path % folder)  # Enter the folder
-            module = __import__(folder, fromlist=[folder])  # Import as module
-            getattr(module, folder).solve()  # Invoke solve method
-            os.chdir(main_path % "")  # Return to main directory
-            print()
+        banner = re.sub(r"[^A-Z ]", "", day_folder.replace("-", " ").upper()).strip()
+        print(f"{banner:=^35s}")
+        os.chdir(main_path % day_folder)
+        module = __import__(day_folder, fromlist=[day_folder])
+        getattr(module, day_folder).solve()
+        os.chdir(main_path % "")
+        print()
 
 if __name__ == "__main__":
     main()

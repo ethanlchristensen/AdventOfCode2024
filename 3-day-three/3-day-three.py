@@ -12,13 +12,36 @@ def part_one():
     """
     code to solve part one
     """
-    return None
+    total = 0
+    data = load_data()
+    pattern = r'mul\((\d+),(\d+)\)'
+    for line in data:
+        matches = re.findall(pattern=pattern, string=line)
+        for match in matches:
+            total += int(match[0]) * int(match[1])
+    return total
 
 def part_two():
     """
     code to solve part two
     """
-    return None
+    active = True
+    total = 0
+    data = load_data()
+    pattern = r'mul\((\d+),(\d+)\)|do\(\)|don\'t\(\)'
+    for line in data:
+        matches = re.finditer(pattern=pattern, string=line)
+        for match in matches:
+            match = match.group()
+            if match == "do()":
+                active = True
+            elif match == "don't()":
+                active = False
+            else:
+                if active:
+                    match = match.replace("mul(", "").replace(")", "").split(",")
+                    total += int(match[0]) * int(match[1])
+    return total
     
 def solve():
     """
