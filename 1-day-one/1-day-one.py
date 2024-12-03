@@ -13,8 +13,7 @@ def load_data(name='data'):
         l1.append(int(vals[0]))
         l2.append(int(vals[1]))
     return l1, l2
-    
-    
+     
 def part_one():
     """
     code to solve part one

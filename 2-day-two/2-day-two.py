@@ -9,28 +9,17 @@ def load_data(name='data'):
         data[idx] = [int(v) for v in data[idx].split(" ")]
     return data
 
-def is_safe(report: list[int]) -> bool:
-        s = sorted(report)
-        if s == report or s[::-1] == report:
-            for idx in range(len(report) - 1):
-                v = abs(report[idx] - report[idx + 1])
-                if not (v >= 1 and v <= 3):
-                    return False
-        else:
-            return False
-        return True
-    
 def part_one():
     """
     code to solve part one
     """
-    return sum([1 if is_safe(report) else 0 for report in load_data()])
+    return sum([1 if all([(report == sorted(report) or report == sorted(report)), all([abs(report[idx] - report[idx + 1]) >= 1 and abs(report[idx] - report[idx + 1]) <= 3]) for idx in range(len(report) - 1)]) else 0 for report in load_data()])
 
 def part_two():
     """
     code to solve part two
     """
-    return sum([1 if (is_safe(report) or any([is_safe([v for i, v in enumerate(report) if i != idx]) for idx in range(len(report))])) else 0 for report in load_data()])
+    return sum([1 if (all([(report == sorted(report) or report == sorted(report)), all([abs(report[idx] - report[idx + 1]) >= 1 and abs(report[idx] - report[idx + 1]) <= 3]) for idx in range(len(report) - 1)]) or any([is_safe([v for i, v in enumerate(report) if i != idx]) for idx in range(len(report))])) else 0 for report in load_data()])
     
 def solve():
     """
