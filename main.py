@@ -120,7 +120,6 @@ def run_solution(day_to_process, main_path):
     module = __import__(day_folder, fromlist=[day_folder])
     getattr(module, day_folder).solve()
     os.chdir(main_path % "")
-    print()
 
 def adjusted_aoc_day_now():
     """Calculate the current AOC day accounting for early release timezone offset."""
