@@ -1,4 +1,4 @@
-PRINT_BOARD = False
+PRINT_BOARD = True
 
 def load_data(name='datasmall'):
     file = open(name, 'r')
