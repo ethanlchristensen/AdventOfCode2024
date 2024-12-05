@@ -7,6 +7,9 @@ import requests
 from pathlib import Path
 from dotenv import load_dotenv
 import pytz
+import importlib.util
+import sys
+from contextlib import contextmanager
 
 # Load environment variables
 load_dotenv(override=True)
@@ -16,7 +19,7 @@ engine = inflect.engine()
 
 # Constants
 AOC_URL = "https://adventofcode.com/2024/day/{}/input"
-MAIN_PATH_TEMPLATE = "{}\\%s"
+MAIN_PATH_TEMPLATE = "{}\\solutions\\%s"
 SESSION_VAR_NAME = "AOC_SESSION"
 DAY_PATTERN = r"\d+-day-.*"
 
@@ -102,6 +105,16 @@ def get_folders(main_path):
         ).keys()
     )
 
+@contextmanager
+def change_directory(directory):
+    """Context manager for changing the current working directory."""
+    current_directory = os.getcwd()
+    try:
+        os.chdir(directory)
+        yield
+    finally:
+        os.chdir(current_directory)
+
 def run_solution(day_to_process, main_path):
     """Run the solution for a specific day."""
     folders = get_folders(main_path)
@@ -116,13 +129,30 @@ def run_solution(day_to_process, main_path):
 
     banner = re.sub(r"[^A-Z ]", "", day_folder.replace("-", " ").upper()).strip()
     print(f"{banner:=^35s}")
-    os.chdir(main_path % day_folder)
-    module = __import__(day_folder, fromlist=[day_folder])
-    getattr(module, day_folder).solve()
-    os.chdir(main_path % "")
+
+    # Construct the path to the solution Python file
+    solution_file_name = f"{day_folder}.py"
+    solution_folder_path = Path(main_path % day_folder)
+    solution_path = solution_folder_path / solution_file_name
+
+    if not solution_path.exists():
+        print(f"Solution file {solution_file_name} does not exist in {day_folder}")
+        return
+
+    # Import and run the solve function with a temporary directory change
+    with change_directory(solution_folder_path):
+        spec = importlib.util.spec_from_file_location(day_folder, solution_path)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)
+
+        if hasattr(module, "solve"):
+            module.solve()
+        else:
+            print(f"No 'solve' function found in {solution_file_name}")
 
 def adjusted_aoc_day_now():
-    """Calculate the current AOC day accounting for early release timezone offset."""
+    '''Calculate the current AOC day accounting for early release timezone offset.'''
     cst = pytz.timezone('America/Chicago')
     now = datetime.now(cst)
     
@@ -135,7 +165,7 @@ def adjusted_aoc_day_now():
 
 def main():
     args = parse_args()
-    main_path = os.getcwd() + "\\%s"
+    main_path = os.path.join(os.getcwd(), "solutions", "%s")
     
     # Adjust AOC day handling
     current_day = adjusted_aoc_day_now()

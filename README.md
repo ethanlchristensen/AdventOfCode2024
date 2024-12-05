@@ -21,7 +21,7 @@ The script uses the current day as context on what solution to run. For example,
 _This command will only download the data if the `data` file is empty or does not exist_
 
 
-Now you can edit the `part_one()` and `part_two()` functions in each `#-<day>-<number>.py` file to return the solution to each part of the problem.
+Now you can edit the `part_one()` and `part_two()` functions in each `solutions/<#-day-<day>/#-<day>-<number>.py` file to return the solution to each part of the problem.
 
 You can then use the `main.py` file to run your solutions as you solve them.
 
