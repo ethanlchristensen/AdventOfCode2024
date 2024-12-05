@@ -1,6 +1,6 @@
-PRINT_BOARD = True
+PRINT_BOARD = False
 
-def load_data(name='datasmall'):
+def load_data(name='data'):
     file = open(name, 'r')
     data = [line.strip() for line in file.readlines()]
     file.close()
