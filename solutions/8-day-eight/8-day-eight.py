@@ -82,6 +82,7 @@ def part_two():
                 data, candidates = place_points_in_line(p1, p2, rise, run, data)
                 for candidate in candidates:
                     if data[candidate[1]][candidate[0]] == ".":
+                        # doesn't work with out this line . . .
                         data[candidate[1]][candidate[0]] = "#"
                         total += 1
         total += len(locations)
