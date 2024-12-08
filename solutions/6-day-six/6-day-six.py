@@ -101,6 +101,8 @@ def part_two():
     """
     code to solve part two
     """
+    start = time.time()
+
     data = load_data()
     guard_position = get_starting_guard_position(data=data)
     
@@ -120,18 +122,20 @@ def part_two():
                 new_data[y][x] = "#"
 
                 if is_loop(data=new_data, guard_position=guard_position, total_chars=total_chars): loops += 1
-    return loops
+
+    return loops, time.time() - start
 
 def solve():
     """
     code to run part one and part two
     """
     part_one_answer = part_one()
-    part_two_answer = part_two()
+    part_two_answer, part_two_time = part_two()
     
     if part_one_answer:
         print(f"part one: {part_one_answer}")
     if part_two_answer:
+        print(f"part two: Time to complete: {part_two_time}")
         print(f"part two: {part_two_answer}")
     
 if __name__ == '__main__':
