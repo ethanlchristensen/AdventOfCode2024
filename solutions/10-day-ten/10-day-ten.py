@@ -9,7 +9,6 @@ def load_data(name="data"):
     with open(name, "r") as file:
         return [list(line.strip()) for line in file.readlines()]
 
-
 def find_all_trail_heads(data):
     trail_heads = []
     for y in range(len(data)):
@@ -18,21 +17,12 @@ def find_all_trail_heads(data):
                 trail_heads.append((x, y))
     return trail_heads
 
-
 def part_one():
     """Code to solve part one"""
     start = time.time()
-
     directions = [[1, 0], [0, 1], [-1, 0], [0, -1]]
-
     data = load_data()
-
-    total = 0
-
     tiles_traversed = {}
-
-    erm = [[" " for _ in range(len(data[0]))] for _ in range(len(data))]
-
     def check_dir(value, x, y, dir, trail_head_id):
         dx, dy = x + dir[0], y + dir[1]
         if 0 <= dy < len(data) and 0 <= dx < len(data[0]):
@@ -40,41 +30,21 @@ def part_one():
                 if int(data[dy][dx]) == int(value) + 1:
                     if (dx, dy) not in tiles_traversed[trail_head_id]["seen_xy"]:
                         tiles_traversed[trail_head_id]["seen_xy"].append((dx, dy))
-                        erm[dy][dx] = data[dy][dx]
                         if data[dy][dx] == "9":
                             tiles_traversed[trail_head_id]["times_hit_9"] += 1
                             return
                         # we found a valid next tile, so now we need to search in all directions
                         new_value = data[dy][dx]
+                        for direction in directions:
+                            check_dir(new_value, dx, dy, direction, trail_head_id)
 
-                        # for row in erm:
-                        #     print(" ".join(row))
-                        # print()
-                        # time.sleep(0.05)
-
-                        check_dir(new_value, dx, dy, directions[0], trail_head_id)
-                        check_dir(new_value, dx, dy, directions[1], trail_head_id)
-                        check_dir(new_value, dx, dy, directions[2], trail_head_id)
-                        check_dir(new_value, dx, dy, directions[3], trail_head_id)
     trail_heads = find_all_trail_heads(data=data)
-
     for trail_head in trail_heads:
         trail_head_id = str(uuid.uuid4())
-        erm[trail_head[1]][trail_head[0]] = "0"
         tiles_traversed[trail_head_id] = {"times_hit_9": 0, "seen_xy": []}
-        check_dir("0", trail_head[0], trail_head[1], directions[0], trail_head_id)
-        check_dir("0", trail_head[0], trail_head[1], directions[1], trail_head_id)
-        check_dir("0", trail_head[0], trail_head[1], directions[2], trail_head_id)
-        check_dir("0", trail_head[0], trail_head[1], directions[3], trail_head_id)
-
-    # for row in erm:
-    #     print(" ".join(row))
-    # print()
-
-    for k, v in tiles_traversed.items():
-        # print(k, ":", v)
-        total += v["times_hit_9"]
-
+        for direction in directions:
+            check_dir("0", trail_head[0], trail_head[1], direction, trail_head_id)
+    total = sum(v["times_hit_9"] for v in tiles_traversed.values())
     end = time.time()
     return total, end - start
 
@@ -82,9 +52,32 @@ def part_one():
 def part_two():
     """Code to solve part two"""
     start = time.time()
+    directions = [[1, 0], [0, 1], [-1, 0], [0, -1]]
+    data = load_data()
+    tiles_traversed = {}
+    def check_dir(value, x, y, dir, trail_head_id):
+        dx, dy = x + dir[0], y + dir[1]
+        if 0 <= dy < len(data) and 0 <= dx < len(data[0]):
+            if data[dy][dx] != ".":
+                if int(data[dy][dx]) == int(value) + 1:
+                # if (dx, dy) not in tiles_traversed[trail_head_id]["seen_xy"]: # just need to comment out this line for part 2!
+                    tiles_traversed[trail_head_id]["seen_xy"].append((dx, dy))
+                    if data[dy][dx] == "9":
+                        tiles_traversed[trail_head_id]["times_hit_9"] += 1
+                        return
+                    new_value = data[dy][dx]
+                    for direction in directions:
+                        check_dir(new_value, dx, dy, direction, trail_head_id)
 
+    trail_heads = find_all_trail_heads(data=data)
+    for trail_head in trail_heads:
+        trail_head_id = str(uuid.uuid4())
+        tiles_traversed[trail_head_id] = {"times_hit_9": 0, "seen_xy": []}
+        for direction in directions:
+            check_dir("0", trail_head[0], trail_head[1], direction, trail_head_id)
+    total = sum(v["times_hit_9"] for v in tiles_traversed.values())
     end = time.time()
-    return None, end - start
+    return total, end - start
 
 
 def solve():
