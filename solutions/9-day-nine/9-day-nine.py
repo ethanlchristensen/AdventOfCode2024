@@ -49,6 +49,7 @@ def get_right_most_block(disk_layout, seen_block_values, highest):
 
 def part_one():
     """Code to solve part one"""
+    start = time.time()
     data = load_data()
     disk_layout = get_layout(data)
     disk_length = len(disk_layout)
@@ -64,10 +65,12 @@ def part_one():
         current_idx -= 1
     disk_layout = [char for char in disk_layout if char != "."]
     total = sum([int(char) * idx for idx, char in enumerate(disk_layout) if char != "."])
-    return total
+    end = time.time()
+    return total, end - start
 
 def part_two(): 
     """Code to solve part two"""
+    start = time.time()
     data = load_data()
     seen_values = []
     disk_layout = get_layout(data)
@@ -91,19 +94,20 @@ def part_two():
                     disk_layout[next_block["start"] + idx] = tmp
                 break
     total = sum([int(char) * idx for idx, char in enumerate(disk_layout) if char != "."])
-    return total
+    end = time.time()
+    return total, end - start
 
 def solve():
     """Run solutions for part one and two"""
-    part_one_answer = part_one()
+    part_one_answer, part_one_time_to_complete = part_one()
 
     if part_one_answer:
-        print(f"part one: {part_one_answer}")
+        print(f"part one: {part_one_answer}\npart one time: {part_one_time_to_complete:.4f}s")
 
-    part_two_answer = part_two()
+    part_two_answer, part_two_time_to_complete = part_two()
     
     if part_two_answer:
-        print(f"part two: {part_two_answer}")
+        print(f"part two: {part_two_answer}\npart two time: {part_two_time_to_complete:.4f}s")
 
 if __name__ == '__main__':
     solve()
