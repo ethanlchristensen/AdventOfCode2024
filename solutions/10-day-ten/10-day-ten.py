@@ -70,13 +70,17 @@ def part_two():
                         check_dir(new_value, dx, dy, direction, trail_head_id)
 
     trail_heads = find_all_trail_heads(data=data)
+
     for trail_head in trail_heads:
         trail_head_id = str(uuid.uuid4())
         tiles_traversed[trail_head_id] = {"times_hit_9": 0, "seen_xy": []}
         for direction in directions:
             check_dir("0", trail_head[0], trail_head[1], direction, trail_head_id)
+
     total = sum(v["times_hit_9"] for v in tiles_traversed.values())
+
     end = time.time()
+    
     return total, end - start
 
 
