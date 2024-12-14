@@ -55,7 +55,7 @@ class FoundTile:
         return (self.x, self.y)
     
 
-def load_data(name="data"):
+def load_data(name="datasmall2"):
     with open(name, "r") as file:
         return [list(line.strip()) for line in file.readlines()]
 
@@ -152,7 +152,7 @@ def run(screen: Screen):
                         screen.print_at("┏", 0, 0, 1)
                         px, py = get_padding_x_y()
                         # text = f"Total Valid Paths Score: {get_total_found_paths()}"
-                        text_nine_hit = f"Total Reachable Trail 9's Score: {get_total_trail_heads()}"
+                        text_nine_hit = f"Total Reachable Trail 9's Score: {paths_hit}"
                         text_2 = f"┃Checking trailhead: {trail_head_id}"
                         for xx in range(1, screen.width - 1):
                             if xx > len(text_nine_hit) + 2:
@@ -180,6 +180,7 @@ def run(screen: Screen):
                             found_tiles.append(FoundTile(
                                 char=new_value, x=x + px + x, y=y + py
                             ))
+                        # time.sleep(0.1)
                         placed_x = check_dir(new_value, dx, dy, directions[0], trail_head_id, placed_x)
                         placed_x = check_dir(new_value, dx, dy, directions[1], trail_head_id, placed_x)
                         placed_x = check_dir(new_value, dx, dy, directions[2], trail_head_id, placed_x)
@@ -213,6 +214,8 @@ def run(screen: Screen):
             screen.print_at(" ", x=X[0], y=X[1], width=1)
     while found_tiles:
         update_found_tiles()
+    text_nine_hit = f"Total Reachable Trail 9's Score: {paths_hit}"
+    screen.print_at(text=f"┃{text_nine_hit}┃", x=0, y=1, width=len(text_nine_hit) + 2)
     input()
 
 
