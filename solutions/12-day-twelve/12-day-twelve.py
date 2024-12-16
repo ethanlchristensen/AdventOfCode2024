@@ -237,7 +237,7 @@ def part_two():
                             print(hits[dyy][dxx])
                             if hits[dyy][dxx] == ".":
                                 hits[dyy][dxx] = bot_char
-                                hits[boty][botx] = "."
+                                hits[boty][botx] = "X"
                                 botx, boty = dxx, dyy
                     else:
                         bot_char, bot_dir = next_dir[bot_char]
@@ -246,7 +246,7 @@ def part_two():
                         print(hits[dyy][dxx])
                         if hits[dyy][dxx] == ".":
                             hits[dyy][dxx] = bot_char
-                            hits[boty][botx] = "."
+                            hits[boty][botx] = "X"
                             botx, boty = dxx, dyy
                 else:
                     bot_char, bot_dir = next_dir[bot_char]
@@ -255,7 +255,7 @@ def part_two():
                     print(hits[dyy][dxx])
                     if hits[dyy][dxx] == ".":
                         hits[dyy][dxx] = bot_char
-                        hits[boty][botx] = "."
+                        hits[boty][botx] = "X"
                         botx, boty = dxx, dyy
             else:
                 bot_char, bot_dir = next_dir[bot_char]
@@ -264,7 +264,7 @@ def part_two():
                 print(hits[dyy][dxx])
                 if hits[dyy][dxx] == ".":
                     hits[dyy][dxx] = bot_char
-                    hits[boty][botx] = "."
+                    hits[boty][botx] = "X"
                     botx, boty = dxx, dyy
             os.system("cls")
             print(bot_char, bot_dir, (botx, boty))
