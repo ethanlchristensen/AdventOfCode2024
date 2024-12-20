@@ -55,7 +55,7 @@ class FoundTile:
         return (self.x, self.y)
     
 
-def load_data(name="datasmall2"):
+def load_data(name="data"):
     with open(name, "r") as file:
         return [list(line.strip()) for line in file.readlines()]
 

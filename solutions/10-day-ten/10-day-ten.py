@@ -5,7 +5,7 @@ import time
 import uuid
 
 
-def load_data(name="datasmall5"):
+def load_data(name="data"):
     with open(name, "r") as file:
         return [list(line.strip()) for line in file.readlines()]
 
