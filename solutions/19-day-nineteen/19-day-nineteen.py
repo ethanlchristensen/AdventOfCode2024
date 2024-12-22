@@ -2,24 +2,56 @@ import os
 import re
 import math
 import time
+from tqdm import tqdm
 
 def load_data(name='data'):
     with open(name, 'r') as file:
-        return [line.strip() for line in file.readlines()]
+        lines = [line.strip() for line in file.readlines() if line.strip() != ""]
+        rules = lines[0].split(", ")
+        towels = lines[1:]
+        return rules, towels
+
+memo = {}
+def valid(rules, string: str):
+    if string not in memo:
+        if len(string) == 0:
+            return 1
+        else:
+            total = 0
+            for rule in rules:
+                if string.startswith(rule):
+                    total += valid(rules, string[len(rule):])
+                memo[string] = total
+    return memo[string]
 
 def part_one():
     """Code to solve part one"""
     start = time.time()
 
+    rules, towels = load_data()
+
+    total = 0
+
+    for towel in towels:
+        if valid(rules, towel):
+            total += 1
     end = time.time()
-    return None, end - start
+    return total, end - start
 
 def part_two(): 
     """Code to solve part two"""
     start = time.time()
 
+    rules, towels = load_data()
+
+    total = 0
+
+    for towel in towels:
+        if possible_combinations := valid(rules, towel):
+            total += possible_combinations
+
     end = time.time()
-    return None, end - start
+    return total, end - start
 
 def solve():
     """Run solutions for part one and two"""
