@@ -2,6 +2,11 @@ import os
 import re
 import math
 import time
+import json
+import pandas as pd
+
+import warnings
+warnings.filterwarnings("ignore")
 
 def load_data(name='data'):
     with open(name, 'r') as file:
@@ -72,23 +77,38 @@ def part_two():
             if sequence not in buyer_price_change_sequences[idx]:
                 buyer_price_change_sequences[idx][sequence] = buyer_prices[idx][jdx+4]
 
-    total = 19 * 19 * 19 * 19
-    it = 0
-    for a in range(-9, 10):
-        for b in range(-9, 10):
-            for c in range(-9, 10):
-                for d in range(-9, 10):
-                    it += 1
-                    sequence = (a, b, c, d)
-                    sequence_total = 0
-                    print(f"{it} / {total} ({it / total * 100:>0.2f}%)", end="\r")
-                    for idx in range(len(data)):
-                        sequence_total += buyer_price_change_sequences[idx].get(sequence, 0)
-                    if sequence_total > best_total:
-                        best_total = sequence_total
-                        best_sequence = sequence
-    print()
-    print(f"Best sequence was {best_sequence} which yielded {best_total} bananas")
+    
+    unique_sequences = set()
+    for k, v in buyer_price_change_sequences.items():
+        for kk, vv in v.items():
+            unique_sequences.add(kk)
+    unique_sequences = list(unique_sequences)
+    df = pd.DataFrame()
+    df["A"] = [v[0] for v in unique_sequences]
+    df["B"] = [v[1] for v in unique_sequences]
+    df["C"] = [v[2] for v in unique_sequences]
+    df["D"] = [v[3] for v in unique_sequences]
+    for buyer in range(len(data)):
+        df[f"buyer_{buyer}"] = [buyer_price_change_sequences[buyer].get(unique_sequences[idx], 0) for idx in range(len(unique_sequences))]
+    df["totals"] = df.loc[:, 'buyer_0':'buyer_2390'].sum(axis=1)
+    df = df.sort_values(by="totals", ascending=False)
+    best_total = df["totals"].to_list()[0]
+
+    # total = 19 * 19 * 19 * 19
+    # it = 0
+    # for a in range(-9, 10):
+    #     for b in range(-9, 10):
+    #         for c in range(-9, 10):
+    #             for d in range(-9, 10):
+    #                 it += 1
+    #                 sequence = (a, b, c, d)
+    #                 sequence_total = 0
+    #                 for idx in range(len(data)):
+    #                     sequence_total += buyer_price_change_sequences[idx].get(sequence, 0)
+    #                 if sequence_total > best_total:
+    #                     best_total = sequence_total
+    #                     best_sequence = sequence
+    # print(f"Best sequence was {best_sequence} which yielded {best_total} bananas")
 
     end = time.time()
     return best_total, end - start
