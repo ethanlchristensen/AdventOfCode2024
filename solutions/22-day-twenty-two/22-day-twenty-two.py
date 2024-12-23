@@ -91,8 +91,7 @@ def part_two():
     for buyer in range(len(data)):
         df[f"buyer_{buyer}"] = [buyer_price_change_sequences[buyer].get(unique_sequences[idx], 0) for idx in range(len(unique_sequences))]
     df["totals"] = df.loc[:, 'buyer_0':'buyer_2390'].sum(axis=1)
-    df = df.sort_values(by="totals", ascending=False)
-    best_total = df["totals"].to_list()[0]
+    best_total = df["totals"].max()
 
     # total = 19 * 19 * 19 * 19
     # it = 0
