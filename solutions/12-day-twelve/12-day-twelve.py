@@ -2,12 +2,12 @@ import os
 import re
 import math
 import time
+from scipy.spatial import ConvexHull
 
 
 def load_data(name="data"):
     with open(name, "r") as file:
         return [list(line.strip()) for line in file.readlines()]
-
 
 def part_one():
     """Code to solve part one"""
@@ -85,12 +85,17 @@ def part_one():
     end = time.time()
     return total, end - start
 
+def get_sides(points):
+    from shapely.geometry import Polygon
+    polygon = Polygon(points)
+    num_sides = len(polygon.exterior.coords) - 1
+    return num_sides
 
 def part_two():
     """Code to solve part two"""
     start = time.time()
 
-    data = load_data("datasmall2")
+    data = load_data("datasmall")
     datastr = "".join([c for row in data for c in row])
 
     crops = {crop: datastr.count(crop) for crop in set(datastr)}
@@ -107,20 +112,15 @@ def part_two():
         (0, -1),
     ]
 
-    hits = [["." for _ in range(len(data[0])+2)] for _ in range(len(data)+2)]
+    hits = [["." for _ in range(len(data[0]))] for _ in range(len(data))]
 
     def check_dir(crop, point, crop_region):
         x, y = point
         if not 0 <= x < len(data[0]) or not 0 <= y < len(data):
-            crop_seen_plots[crop].add(point)
-            crop_perimeters[crop][crop_region] += 1
             return 0
         if data[y][x] != crop:
-            crop_seen_plots[crop].add(point)
-            crop_perimeters[crop][crop_region] += 1
             return 0
         if point in crop_seen_plots[crop]:
-            crop_seen_plots[crop].add(point)
             return 0
 
         crop_region_plots[crop][crop_region].add(point)
@@ -158,132 +158,19 @@ def part_two():
     
     total = 0
 
-    for crop in crop_region_totals:
-        region_totals = crop_region_totals[crop]
-        region_perimeters = crop_perimeters[crop]
-        for region in region_totals:
-            total += region_totals[region] * region_perimeters[region]
-
-    def is_surrounded(point, crop):
-        for direction in directions:
-            dx, dy = point[0] + direction[0], point[1] + direction[1]
-            if not 0 <= dx < len(data[0]) or not 0 <= dy < len(data):
-                return False
-            if data[dy][dx] != crop:
-                return False
-        return True
-
-    def find_open_plot_near_crop(points, crop):
-        for point in points:
-            for direction in directions:
-                dx, dy = point[0] + direction[0], point[1] + direction[1]
-                if 0 <= dx < len(data[0]) and 0 <= dy < len(data):
-                    if data[dy][dx] != crop:
-                        return (dx, dy)
-
-
-    target = "C"
-    sides = 0
-    bot_moves = {
-        "^": (0, -1),
-        ">": (1, 0),
-        "v": (0, 1),
-        "<": (-1, 0)
-    }
-    next_dir = {
-        "^": (">", bot_moves[">"]),
-        ">": ("v", bot_moves["v"]),
-        "v": ("<", bot_moves["<"]),
-        "<": ("^", bot_moves["^"]),
-    }
-
-    def rotate(dir):
-        return next_dir[dir]
-
-    for region in crop_region_plots[target]:
-        plots = crop_region_plots[target][region]
-        if len(plots) == 1:
-            crop_region_sides[target][region] = 4
-            break
-        plots = [plot for plot in plots if not is_surrounded(plot, target)]
-        for x, y in plots:
-            hits[y+1][x+1] = "#"
-        botx, boty = find_open_plot_near_crop(plots, target)
-        botx += 1
-        boty += 1
-        bot_char = "^"
-        bot_dir = bot_moves[bot_char]
-        hits[boty][botx] = bot_char
-
-        for row in hits:
-            print(" ".join(row))
-        time.sleep(2)
-        # search clockwise
-        while True:
-            dx, dy = botx + bot_dir[0], boty + bot_dir[1]
-            if 0 <= dx < len(hits[0]) and 0 <= dy < len(hits):
-                if hits[dy][dx] == '.':
-                    bots_right = next_dir[bot_char][1]
-                    dxx, dyy = botx + bots_right[0], boty + bots_right[1]
-                    if 0 <= dxx < len(hits[0]) and 0 <= dyy < len(hits):
-                        if hits[dyy][dxx] == "#":
-                            hits[dy][dx] = bot_char
-                            hits[boty][botx] = "."
-                            botx, boty = dx, dy
-                        else:
-                            bot_char, bot_dir = next_dir[bot_char]
-                            hits[boty][botx] = bot_char
-                            dxx, dyy = botx + bot_dir[0], boty + bot_dir[1]
-                            print(hits[dyy][dxx])
-                            if hits[dyy][dxx] == ".":
-                                hits[dyy][dxx] = bot_char
-                                hits[boty][botx] = "X"
-                                botx, boty = dxx, dyy
-                    else:
-                        bot_char, bot_dir = next_dir[bot_char]
-                        hits[boty][botx] = bot_char
-                        dxx, dyy = botx + bot_dir[0], boty + bot_dir[1]
-                        print(hits[dyy][dxx])
-                        if hits[dyy][dxx] == ".":
-                            hits[dyy][dxx] = bot_char
-                            hits[boty][botx] = "X"
-                            botx, boty = dxx, dyy
-                else:
-                    bot_char, bot_dir = next_dir[bot_char]
-                    hits[boty][botx] = bot_char
-                    dxx, dyy = botx + bot_dir[0], boty + bot_dir[1]
-                    print(hits[dyy][dxx])
-                    if hits[dyy][dxx] == ".":
-                        hits[dyy][dxx] = bot_char
-                        hits[boty][botx] = "X"
-                        botx, boty = dxx, dyy
-            else:
-                bot_char, bot_dir = next_dir[bot_char]
-                hits[boty][botx] = bot_char
-                dxx, dyy = botx + bot_dir[0], boty + bot_dir[1]
-                print(hits[dyy][dxx])
-                if hits[dyy][dxx] == ".":
-                    hits[dyy][dxx] = bot_char
-                    hits[boty][botx] = "X"
-                    botx, boty = dxx, dyy
-            os.system("cls")
-            print(bot_char, bot_dir, (botx, boty))
-            for row in hits:
-                print(" ".join(row))
-
-            time.sleep(0.25)
-            
-            # next spot
-            # can we go up?
-            
-            
-        print()
-        hits[pny][pnx] = "."
-
-    print(crop_region_sides[target])
+    for target in crop_seen_plots:
+        target_points = crop_seen_plots[target].copy()
+        for x, y in crop_seen_plots[target]:
+            target_points.add((x+1,y))
+        if len(target_points) == 2:
+            bx, by = list(crop_seen_plots[target])[0]
+            target_points.add((bx + 2, by))
+            target_points.add((bx + 3, by))
+        corners = get_sides(list(target_points))
+        total += corners
 
     end = time.time()
-    return None, end - start
+    return total, end - start
 
 
 def solve():

@@ -2,7 +2,7 @@ import os
 import re
 import math
 import time
-from multiprocessing import Pool
+import multiprocessing
 
 def load_data(name='data'):
     with open(name, 'r') as file:
@@ -89,13 +89,46 @@ def part_one():
     end = time.time()
     return ",".join([str(v) for v in output_values]), end - start
 
+def run_program(n, program):
+    output = []
+    while n != 0:
+        n = n >> 3
+        output.append(n % 8)
+        # if output != program[:len(output)]: return None
+    return output
+
+def correct_digits(result, program):
+    c = 0
+    for idx in range(len(program)-1,-1,-1):
+        if result[idx] != program[idx]:
+            break
+        c += 1
+    return c
+
 def part_two():
-    start = time.time()
+    """Code to solve part 2"""
+    start_time = time.time()
+    registers, program = load_data("data")
+    number_of_digits = len(program)
+    start = 8**(number_of_digits - 1)
+    end = 8**number_of_digits - 1
 
-    data = load_data()
+    value = start + int((end - start) / 2.5867039189)
+    value += (8**8) * 5 - (8**7) * 4 - (8**6 ) * 2 + (8**5) * 4 - (8**4) * 4 - (8**3) * 2 + (8**2) - 8
+    
+    while run_program(value, program) == program:
+        value -= 1
+    
+    print(value + 1)
 
-    end = time.time()
-    return None, end - start
+    res = run_program(value + 1, program)
+    print(program)
+    print(res)
+    
+    end_time = time.time()
+    return program, end_time - start_time
+    
+
 
 def solve():
     """Run solutions for part one and two"""
@@ -110,5 +143,5 @@ def solve():
         print(f"part two: {part_two_answer}\npart two time: {part_two_time_to_complete:.4f}s")
 
 if __name__ == '__main__':
-    solve()
+    part_two()
 
