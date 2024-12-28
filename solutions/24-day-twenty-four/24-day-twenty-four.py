@@ -60,56 +60,35 @@ def part_one():
     end = time.time()
     return result, end - start
 
+def add_binary_numbers(a: str, b: str) -> str:
+    max_len = max(len(a), len(b))
+    a = a.zfill(max_len)
+    b = b.zfill(max_len)
+    a_bits = [int(x) for x in a]
+    b_bits = [int(x) for x in b]
+    result = []
+    carry = 0
+    for i in range(max_len - 1, -1, -1):
+        bit_a = a_bits[i]
+        bit_b = b_bits[i]
+        sum_without_carry = bit_a ^ bit_b
+        sum_bit = sum_without_carry ^ carry
+        carry = (bit_a & bit_b) | (carry & (bit_a ^ bit_b))
+        result.insert(0, str(sum_bit))
+    if carry:
+        result.insert(0, '1')
+    return ''.join(result)
+
+
 def part_two(): 
     """Code to solve part two"""
     start = time.time()
 
-    start = time.time()
-
     regs, ops = load_data("datasmall3")
 
-    for op in ops:
-        print(op)
+    ops = [(op,x,y) for x, op, y, _ in ops]
 
-    try_again = []
-    idx = 0
-    for r1, op, r2, out in ops:
-        if r1 in regs and r2 in regs:
-            v1 = regs[r1]
-            v2 = regs[r2]
-            if op == "AND":
-                regs[out] = v1 & v2
-            elif op == "OR":
-                regs[out] = v1 | v2
-            else:
-                regs[out] = v1 ^ v2
-        else:
-            try_again.append(idx)
-        idx += 1
-    
-    try_idx = 0
-    while len(try_again) > 0:
-        r1, op, r2, out = ops[try_again[try_idx]]
-        if r1 in regs and r2 in regs:
-            v1 = regs[r1]
-            v2 = regs[r2]
-            if op == "AND":
-                regs[out] = v1 & v2
-            elif op == "OR":
-                regs[out] = v1 | v2
-            else:
-                regs[out] = v1 ^ v2
-            try_again.remove(try_again[try_idx])
-        else:
-            try_idx += 1
-        
-        if try_idx >= len(try_again):
-            try_idx = 0
-
-    regs = {k:v for k,v in regs.items() if "z" in k}
-    # regs = sorted(regs.items(), key=lambda x: int(x[0][1:]), reverse=True)
-    print(regs)
-    # result = int(''.join(map(str, list([item[1] for item in regs]))), 2)
+    print(ops)
 
     end = time.time()
     return None, end - start
